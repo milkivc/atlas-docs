@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Metadata Schema for Atlas Vivo MILK Documentation",
+  "description": "Schema for validating metadata.json files in Atlas Vivo MILK documentation repositories",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Title of the documentation or resource"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Detailed description of the documentation or resource"
+    },
+    "license": {
+      "type": "string",
+      "enum": ["EUPL-1.2", "CC-BY-SA-4.0", "CC-BY-NC-ND-4.0", "CC-BY-4.0"],
+      "description": "License for the documentation or resource"
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Keywords or tags for the documentation or resource"
+    },
+    "creators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "orcid": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{4}-\\d{4}-\\d{4}$"
+          }
+        },
+        "required": ["name", "orcid"]
+      },
+      "description": "Authors or creators of the documentation or resource"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Version of the documentation or resource"
+    },
+    "datePublished": {
+      "type": "string",
+      "format": "date",
+      "description": "Publication date of the documentation or resource"
+    },
+    "doi": {
+      "type": "string",
+      "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Z0-9]+$",
+      "description": "Digital Object Identifier (DOI) for the documentation or resource"
+    }
+  },
+  "required": ["title", "description", "license", "creators", "version", "datePublished"]
+}
