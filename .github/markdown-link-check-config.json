@@ -1,0 +1,19 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^https://github.com/"
+    },
+    {
+      "pattern": "^https://zenodo.org/"
+    },
+    {
+      "pattern": "^https://orcid.org/"
+    }
+  ],
+  "replacementPatterns": [
+    {
+      "pattern": "^docs/",
+      "replacement": ""
+    }
+  ]
+}
