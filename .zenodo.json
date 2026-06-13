@@ -3,11 +3,11 @@
     "title": "Atlas Vivo MILK - Documentação",
     "upload_type": "publication",
     "publication_type": "report",
-    "description": "Documentação técnica, legal e financeira do Atlas Vivo MILK. Inclui arquitetura, API, políticas de privacidade, termos de uso e propostas de financiamento.",
+    "description": "Documentação técnica, legal e financeira do Atlas Vivo MILK. Inclui arquitetura, API, políticas de privacidade, termos de uso e propostas de financiamento. Alinhada com RGPD, AI Act, NIS2 e soberania tecnológica da UE.",
     "creators": [
       {
-        "name": "Associação MILK",
-        "affiliation": "Associação MILK - Movimento de Intervenções e Linguagens Kulturais e Arte"
+        "name": "Associação MILK - Movimento de Intervenções e Linguagens Kulturais e Arte",
+        "affiliation": "Associação MILK"
       },
       {
         "name": "Eduardo Maurício Vieira Cabral e Araujo",
@@ -22,12 +22,12 @@
       "cultura",
       "património",
       "Atlas Vivo MILK",
-      "Zenodo",
-      "ORCID",
       "RGPD",
       "AI Act",
       "NIS2",
-      "soberania digital"
+      "soberania digital",
+      "interoperabilidade",
+      "conformidade"
     ],
     "notes": "Documentação alinhada com os princípios CARE e em conformidade com RGPD, AI Act e NIS2. Infraestrutura baseada em provedores europeus.",
     "related_identifiers": [
@@ -46,6 +46,13 @@
       {
         "identifier": "milkivc"
       }
-    ]
+    ],
+    "access_right": "open",
+    "conformity": {
+      "rgpd": true,
+      "ai_act": true,
+      "nis2": true,
+      "eu_tech_sovereignty": true
+    }
   }
 }
