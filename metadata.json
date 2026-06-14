@@ -1,20 +1,28 @@
 {
   "title": "Atlas Vivo MILK - Documentação",
-  "description": "Documentação oficial do Atlas Vivo MILK, incluindo guias, relatórios e manuais para interoperabilidade e conformidade legal.",
+  "description": "Documentação oficial do Atlas Vivo MILK, incluindo guias, relatórios e manuais para interoperabilidade e conformidade legal. Alinhada com RGPD, AI Act, NIS2 e princípios de soberania tecnológica da UE.",
   "license": "CC-BY-SA-4.0",
-  "keywords": ["documentação", "cultura", "património", "interoperabilidade", "conformidade"],
+  "keywords": ["documentação", "cultura", "património", "interoperabilidade", "conformidade", "Portugal", "RGPD", "AI Act", "NIS2", "soberania digital"],
   "creators": [
     {
-      "name": "Associação MILK - Movimentos de Intervenções e Linguagens Kulturais e Arte",
-      "orcid": "0000-0000-0000-0000"
+      "name": "Associação MILK - Movimento de Intervenções e Linguagens Kulturais e Arte"
     },
     {
       "name": "Eduardo Maurício Vieira Cabral e Araujo",
-      "orcid": "0000-0000-0000-0000"
+      "orcid": "0009-0004-9132-2925"
     }
   ],
   "version": "1.0.0",
-  "datePublished": "2026-06-06",
+  "datePublished": "2025-06-14",
   "doi": "",
-  "relatedIdentifiers": []
+  "relatedIdentifiers": [
+    {
+      "relation": "isPartOf",
+      "identifier": "https://github.com/milkivc/atlas-vivo-milk"
+    },
+    {
+      "relation": "hasPart",
+      "identifier": "https://github.com/milkivc/atlas-datasets"
+    }
+  ]
 }
