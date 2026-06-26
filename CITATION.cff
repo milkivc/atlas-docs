@@ -1,19 +1,75 @@
 cff-version: 1.2.0
-message: "If you use this documentation, please cite it as below."
-title: "Atlas Vivo MILK - Documentação"
+message: "If you use this software, please cite it using the following metadata."
 type: software
-authors:
-  - given-names: "Associação"
-    family-names: "MILK"
-    affiliation: "Associação MILK"
-  - given-names: "Eduardo Maurício Vieira Cabral e"
-    family-names: "Araujo"
-    orcid: "https://orcid.org/0009-0004-9132-2925"
-    affiliation: "Associação MILK"
+
+# Citation information for Atlas Vivo MILK - Documentation
+title: Atlas Vivo MILK - Documentation
 version: 1.0.0
-license: CC-BY-SA-4.0
-repository-code: "https://github.com/milkivc/atlas-docs"
-keywords: ["documentação", "cultura", "património", "interoperabilidade", "conformidade", "Portugal"]
+
+# Authors
+authors:
+  - given-names: Nuno Filipe Fernandes Vieira Cabral e
+    family-names: Araujo
+    orcid: https://orcid.org/0009-0009-1781-4020
+    email: nuno@associacaomilk.pt
+    affiliation: Associacao MILK - Movimento de Intervencoes e Linguagens Kulturais e Arte
+
+  - given-names: Eduardo Mauricio Vieira Cabral e
+    family-names: Araujo
+    orcid: https://orcid.org/0009-0007-6892-6570
+    email: eduardo@associacaomilk.pt
+    affiliation: Associacao MILK - Movimento de Intervencoes e Linguagens Kulturais e Arte
+
+# Description
+abstract: Documentacao oficial do Atlas Vivo MILK, incluindo guias, relatorios e manuais para interoperabilidade e conformidade legal.
+
+# Keywords
+keywords:
+  - documentacao
+  - cultura
+  - patrimonio
+  - interoperabilidade
+  - conformidade
+  - Portugal
+  - Atlas Vivo MILK
+  - Associacao MILK
+
+# License
+license: EUPL-1.2
+license-url: https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+
+# Repository information
+repository: https://github.com/milkivc/atlas-docs
+repository-code: https://github.com/milkivc/atlas-docs
+
+# Issue tracker
+issue-tracker: https://github.com/milkivc/atlas-docs/issues
+
+# URLs
+url: https://github.com/milkivc/atlas-docs
+
+# Identifiers
 identifiers:
-  - type: doi
-    value: "10.5281/zenodo.XXXXXXX"
+  - type: url
+    value: https://github.com/milkivc/atlas-docs
+  - type: url
+    value: https://codeberg.org/milkivc/associacao-milk-marco-zero
+
+# Related resources
+related-resources:
+  - type: software
+    title: Atlas Vivo MILK
+    identifier: https://github.com/milkivc/atlas-vivo-milk
+    relation: isPartOf
+
+  - type: dataset
+    title: Atlas Vivo MILK - Datasets
+    identifier: https://github.com/milkivc/atlas-datasets
+    relation: isPartOf
+
+# Contact
+contact:
+  - email: milk@associacaomilk.pt
+    name: Associacao MILK
+  - email: dpo@associacaomilk.pt
+    name: Data Protection Officer
