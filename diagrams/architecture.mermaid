@@ -1,0 +1,28 @@
+--- 
+title: Atlas Vivo System Architecture
+description: Architecture diagram showing the integration of Atlas Vivo with Codeberg, Zenodo, ORCID, and Portuguese state systems
+license: EUPL-1.2
+author: Associacao MILK - Vibe Work Agent
+date: 2026-07-23
+---
+
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ff6b6b', 'primaryTextColor': '#fff', 'lineColor': '#666', 'secondaryColor': '#f0f0f0', 'tertiaryColor': '#fff'}}}%%
+
+graph TD
+    A[Utilizadores] -->|Submissao| B[Frontend Atlas Vivo]
+    B -->|API| C[Backend Services]
+    C -->|Git API| D[Codeberg]
+    C -->|Zenodo API| E[Zenodo]
+    C -->|ORCID API| F[ORCID]
+    D -->|Sync| G[GitHub Mirror]
+    E -->|DOI| F
+    C -->|Metadados| H[SNIG/AMA]
+    
+    style A fill:#e1f5fe
+    style B fill:#e8f5e8
+    style C fill:#fff3e0
+    style D fill:#f3e5f5
+    style E fill:#e0f2f1
+    style F fill:#fce4ec
+    style G fill:#e8eaf6
+    style H fill:#fff9c4
