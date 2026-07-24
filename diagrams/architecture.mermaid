@@ -1,28 +1,64 @@
---- 
-title: Atlas Vivo System Architecture
-description: Architecture diagram showing the integration of Atlas Vivo with Codeberg, Zenodo, ORCID, and Portuguese state systems
-license: EUPL-1.2
-author: Associacao MILK - Vibe Work Agent
-date: 2026-07-23
----
-
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ff6b6b', 'primaryTextColor': '#fff', 'lineColor': '#666', 'secondaryColor': '#f0f0f0', 'tertiaryColor': '#fff'}}}%%
+%% Atlas Vivo System Architecture
+%% Generated from documentacao-tecnica-ai-act.md
+%% Last Updated: 2026-07-24
+%% Version: 1.1.0
 
 graph TD
-    A[Utilizadores] -->|Submissao| B[Frontend Atlas Vivo]
-    B -->|API| C[Backend Services]
-    C -->|Git API| D[Codeberg]
-    C -->|Zenodo API| E[Zenodo]
-    C -->|ORCID API| F[ORCID]
-    D -->|Sync| G[GitHub Mirror]
-    E -->|DOI| F
-    C -->|Metadados| H[SNIG/AMA]
+    subgraph Users["Utilizadores"]
+        A1[Pesquisadores]
+        A2[Instituições]
+        A3[Cidadãos]
+    end
     
-    style A fill:#e1f5fe
-    style B fill:#e8f5e8
-    style C fill:#fff3e0
-    style D fill:#f3e5f5
-    style E fill:#e0f2f1
-    style F fill:#fce4ec
-    style G fill:#e8eaf6
-    style H fill:#fff9c4
+    subgraph Frontend["Frontend Atlas Vivo"]
+        B[Web Interface]
+        B1[Mobile Responsive]
+    end
+    
+    subgraph Backend["Backend Services"]
+        C[API Gateway]
+        C1[Authentication Service]
+        C2[Data Validation]
+        C3[Metadata Processor]
+    end
+    
+    subgraph Repositories["Code Repositories"]
+        D[Codeberg Primary]
+        D1[GitHub Mirror]
+    end
+    
+    subgraph Data["Data Platforms"]
+        E[Zenodo]
+        E1[DOI Registration]
+    end
+    
+    subgraph Identity["Researcher Identity"]
+        F[ORCID]
+        F1[Profile Sync]
+    end
+    
+    subgraph Government["Portuguese Systems"]
+        H[SNIG]
+        H1[AMA]
+        H2[INSPIRE Compliance]
+    end
+    
+    %% Connections
+    Users -->|Submissão| Frontend
+    Frontend -->|API Calls| Backend
+    Backend -->|Git API| Repositories
+    Backend -->|Zenodo API| Data
+    Backend -->|ORCID API| Identity
+    Backend -->|Metadados| Government
+    
+    Repositories -->|Sync| D1
+    Data -->|DOI| E1
+    Identity -->|Sync| F1
+    
+    style Users fill:#f9f,stroke:#333
+    style Frontend fill:#bbf,stroke:#333
+    style Backend fill:#9f9,stroke:#333
+    style Repositories fill:#ff9,stroke:#333
+    style Data fill:#99f,stroke:#333
+    style Identity fill:#f99,stroke:#333
+    style Government fill:#9f9,stroke:#333

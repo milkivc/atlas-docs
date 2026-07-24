@@ -2,46 +2,45 @@
 
 This directory contains Mermaid diagrams for the Atlas Vivo ecosystem.
 
-## Available Diagrams
+## Current Diagrams
 
-- [architecture.mermaid](./architecture.mermaid) - System architecture showing integration with Codeberg, Zenodo, ORCID, and Portuguese state systems
+### architecture.mermaid
+- **Description**: System architecture overview for Atlas Vivo
+- **Source**: Generated from documentacao-tecnica-ai-act.md
+- **Version**: 1.1.0
+- **Last Updated**: 2026-07-24
+- **Components**:
+  - User interfaces
+  - Frontend and backend services
+  - Code repositories (Codeberg + GitHub Mirror)
+  - Data platforms (Zenodo)
+  - Researcher identity (ORCID)
+  - Portuguese government systems (SNIG, AMA)
 
-## Usage
+## Version History
 
-### Viewing Diagrams
+| Version | Date | Changes | Author |
+|---------|------|---------|--------|
+| 1.0.0 | 2026-06-25 | Initial architecture diagram | Vibe Work Agent |
+| 1.1.0 | 2026-07-24 | Enhanced with subgraphs and styling | Vibe Work Agent |
 
-1. **GitHub**: Mermaid diagrams render automatically in GitHub markdown preview
-2. **Local**: Use VS Code with Mermaid extension or [Mermaid Live Editor](https://mermaid.live/)
-3. **Documentation**: Include diagrams in markdown files using triple backtick mermaid code blocks
+## How to Update
 
-### Adding New Diagrams
+1. Edit the Mermaid source files directly in this directory
+2. Or update the source documentation and run the sync workflow
+3. All changes are automatically versioned via Git commits
 
-1. Create a new .mermaid file in this directory
-2. Use the following template:
+## Rendering
 
-```mermaid
----
-title: Diagram Title
-description: Brief description
-author: Your Name
-date: YYYY-MM-DD
----
+These Mermaid diagrams can be:
+- Viewed directly in GitHub (with Mermaid support)
+- Rendered using any Mermaid-compatible viewer
+- Imported into documentation
 
-graph TD
-    A[Start] --> B[Process]
-    B --> C[End]
-```
+## Automation
 
-3. Commit and push changes
-
-### Synchronization
-
-This directory is automatically synchronized with local filesystem and Codeberg repositories.
-
-## License
-
-All diagrams are licensed under **EUPL-1.2** (European Union Public Licence v1.2).
-
-## Contact
-
-For questions or issues, contact: milk@associacaomilk.pt
+This directory is part of an automated workflow that:
+- Checks for diagram updates in source documentation
+- Syncs changes to GitHub
+- Maintains version history
+- Ensures compliance with Atlas Vivo standards
