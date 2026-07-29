@@ -238,7 +238,7 @@ Após implementação das medidas de mitigação:
 | Relatório | Frequência | Destinatários |
 |-----------|------------|--------------|
 | **Relatório de Segurança** | Semanal | DPO, Equipa Técnica |
-| **Relatório de Sistema** | Mensal | DPO, Direção |
+| **Relatório de Conformidade** | Mensal | DPO, Direção |
 | **Relatório de Incidentes** | Trimestral | DPO, CNPD (se aplicável) |
 | **Relatório Anual** | Anual | Todos os stakeholders |
 
