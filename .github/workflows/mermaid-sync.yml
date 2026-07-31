@@ -1,4 +1,4 @@
-name: Atlas MILK — Validação Automática Mistral de Diagramas
+name: Atlas MILK — Diagramas com Gate Mistral e Commit
 
 on:
   schedule:
@@ -11,89 +11,109 @@ on:
       - '.github/workflows/mermaid-sync.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: atlas-milk-mistral-diagram-validation
+  group: atlas-milk-mistral-diagram-publication
   cancel-in-progress: true
 
 jobs:
-  validate:
+  validate-and-publish:
     runs-on: ubuntu-latest
     env:
       MISTRAL_AGENT_ID: ag_019e93f1cc6571089ffe3042ff0fe7ce
       MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
     steps:
-      - name: Checkout read-only
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
-          persist-credentials: false
+          fetch-depth: 0
 
       - name: Deterministic integrity checks
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p audit
+          mkdir -p audit diagrams
           find diagrams docs/diagrams -type f \( -name '*.mmd' -o -name '*.mermaid' -o -name '*.md' \) -print 2>/dev/null | sort > audit/files.txt || true
-          while IFS= read -r file; do
-            sha256sum "$file"
-          done < audit/files.txt > audit/sha256.txt
+          while IFS= read -r file; do sha256sum "$file"; done < audit/files.txt > audit/sha256.txt
+          ! grep -RIE '(MISTRAL_API_KEY|CODEBERG_TOKEN|ZENODO_TOKEN|ORCID_TOKEN|ghp_|sk-[A-Za-z0-9])' diagrams docs/diagrams 2>/dev/null
           {
-            echo 'ATLAS VIVO MILK — DIAGRAM VALIDATION MANIFEST'
+            echo 'ATLAS VIVO MILK — PUBLIC DIAGRAM MANIFEST'
             echo "repository=${GITHUB_REPOSITORY}"
             echo "commit=${GITHUB_SHA}"
             echo "run_id=${GITHUB_RUN_ID}"
             echo "file_count=$(wc -l < audit/files.txt)"
-            echo 'No Drive content, secrets, personal data or invisible-layer corpus included.'
+            echo 'Scope: public diagram files only. No Drive, personal data, invisible layer or secret orchestration.'
           } > audit/manifest.txt
           cat audit/files.txt audit/sha256.txt >> audit/manifest.txt
-          ! grep -RIE '(MISTRAL_API_KEY|CODEBERG_TOKEN|ZENODO_TOKEN|ORCID_TOKEN|ghp_|sk-[A-Za-z0-9])' diagrams docs/diagrams 2>/dev/null
-          test -z "$(git status --porcelain --untracked-files=no)"
 
-      - name: Mistral agent review of minimised manifest
+      - name: Mistral publication gate
+        id: mistral
         shell: bash
         run: |
           set -euo pipefail
           if [ -z "${MISTRAL_API_KEY:-}" ]; then
-            printf '%s\n' 'MISTRAL_NOT_CONFIGURED — deterministic validation completed; no external call made.' > audit/mistral-status.txt
+            echo 'decision=PENDENTE_MISTRAL' >> "$GITHUB_OUTPUT"
+            echo 'MISTRAL_NOT_CONFIGURED' > audit/mistral-status.txt
             exit 0
           fi
           python3 - <<'PY'
           import json, os, urllib.request
-          manifest = open('audit/manifest.txt', encoding='utf-8').read()
-          prompt = '''Actua como agente de integridade do Atlas Vivo MILK. Analisa apenas este manifesto minimizado de ficheiros públicos do repositório. Não assumes execução, conformidade, integração ou autoria sem prova. Classifica cada risco como FACTO, INFERÊNCIA, HIPÓTESE ou PROPOSTA. Não peças nem reveles segredos. Não publiques nem alteres nada. Responde em JSON com: status, riscos, inconsistencias, bloqueios_publicacao, recomendacao_humana.\n\n''' + manifest
-          payload = json.dumps({
-            'agent_id': os.environ['MISTRAL_AGENT_ID'],
-            'inputs': [{'role':'user','content':prompt}],
-            'store': False
-          }).encode()
-          req = urllib.request.Request(
-            'https://api.mistral.ai/v1/conversations',
-            data=payload,
-            headers={'Authorization':'Bearer '+os.environ['MISTRAL_API_KEY'],'Content-Type':'application/json'},
-            method='POST'
-          )
+          manifest=open('audit/manifest.txt',encoding='utf-8').read()
+          prompt='''Actua como gate europeu de publicação do Atlas Vivo MILK. Analisa apenas o manifesto minimizado de diagramas públicos. Autoriza publicação somente se não houver segredos, dados pessoais, conteúdo da camada invisível, orquestração secreta, autoria não comprovada ou afirmações de execução sem prova. Responde obrigatoriamente em JSON com decision igual a PUBLICAR_APROVADO ou PUBLICAR_BLOQUEADO, e campos riscos e fundamento.\n\n'''+manifest
+          payload=json.dumps({'agent_id':os.environ['MISTRAL_AGENT_ID'],'inputs':[{'role':'user','content':prompt}],'store':False}).encode()
+          req=urllib.request.Request('https://api.mistral.ai/v1/conversations',data=payload,headers={'Authorization':'Bearer '+os.environ['MISTRAL_API_KEY'],'Content-Type':'application/json'},method='POST')
+          decision='PUBLICAR_BLOQUEADO'
           try:
-            with urllib.request.urlopen(req, timeout=60) as r:
-              body = r.read().decode('utf-8')
+            with urllib.request.urlopen(req,timeout=60) as r: body=r.read().decode('utf-8')
             open('audit/mistral-response.json','w',encoding='utf-8').write(body)
-            open('audit/mistral-status.txt','w',encoding='utf-8').write('MISTRAL_AGENT_CALLED — response stored as private workflow artifact; no publication or repository write.\n')
+            if 'PUBLICAR_APROVADO' in body: decision='PUBLICAR_APROVADO'
           except Exception as exc:
-            open('audit/mistral-status.txt','w',encoding='utf-8').write('MISTRAL_CALL_FAILED — deterministic validation preserved; no publication occurred. '+type(exc).__name__+'\n')
+            open('audit/mistral-response.json','w',encoding='utf-8').write(json.dumps({'error':type(exc).__name__}))
+          open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8').write('decision='+decision+'\n')
+          open('audit/mistral-status.txt','w',encoding='utf-8').write(decision+'\n')
           PY
 
-      - name: Preserve private audit report
+      - name: Create qualified publication record
+        if: steps.mistral.outputs.decision == 'PUBLICAR_APROVADO'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, hashlib, pathlib, datetime
+          files=[]
+          for line in pathlib.Path('audit/sha256.txt').read_text().splitlines():
+            if not line.strip(): continue
+            h,p=line.split(None,1)
+            files.append({'path':p.strip(),'sha256':h})
+          record={'status':'PUBLICADO_COM_GATE_MISTRAL','agent_id':'ag_019e93f1cc6571089ffe3042ff0fe7ce','generated_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'files':files,'scope':'camada_publica_diagramas'}
+          pathlib.Path('diagrams/.atlas-milk-publication.json').write_text(json.dumps(record,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+
+      - name: Commit approved public diagrams
+        if: steps.mistral.outputs.decision == 'PUBLICAR_APROVADO'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Associação MILK — Gate Mistral'
+          git config user.email 'somostodospossiveis@users.noreply.github.com'
+          git add diagrams/ docs/diagrams/
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "publish(diagrams): Mistral-approved public update [skip ci]"
+            git push origin HEAD:master
+          else
+            echo 'Conteúdo público já corresponde ao estado aprovado.'
+          fi
+
+      - name: Preserve audit
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: atlas-milk-diagram-integrity-${{ github.run_id }}
+          name: atlas-milk-diagram-audit-${{ github.run_id }}
           path: audit/
           retention-days: 30
           if-no-files-found: error
 
-      - name: Confirm no repository modification or publication
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -z "$(git status --porcelain --untracked-files=no)"
-          echo 'Automatic analysis remains active. No commit, push, deploy or publication was performed.'
+      - name: Report continuation
+        if: always()
+        run: echo "Validação concluída; decisão Mistral=${{ steps.mistral.outputs.decision }}. O trabalho interno nunca é bloqueado; apenas a publicação exige aprovação."
