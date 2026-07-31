@@ -1,62 +1,31 @@
-name: Mermaid Diagrams Sync
+name: Mermaid Diagrams — Manual Validation Only
 
 on:
-  schedule:
-    - cron: '0 * * * *'  # Run hourly
-  workflow_dispatch:   # Allow manual trigger
-  push:
-    paths:
-      - 'diagrams/**'
-      - 'docs/diagrams/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  sync-diagrams:
+  validate-diagrams:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Get full history for proper version tracking
-        token: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        
-    - name: Install dependencies
-      run: npm install glob node-fetch @actions/core @actions/github
-      
-    - name: Create diagrams directory
-      run: mkdir -p diagrams docs/diagrams
-      
-    - name: Sync Mermaid diagrams
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        # This is a placeholder for the actual sync script
-        # In production, use the mermaid-sync.js script
-        echo "Mermaid diagram sync would run here"
-        
-        # For now, just ensure directories exist
-        touch diagrams/.gitkeep
-        touch docs/diagrams/.gitkeep
-        
-    - name: Commit and push changes
-      run: |
-        git config --global user.name "Vibe Work Agent"
-        git config --global user.email "vibe@associacaomilk.pt"
-        git add diagrams/ docs/diagrams/
-        
-        # Check if there are changes to commit
-        if [ -n "$(git status --porcelain)" ]; then
-          git commit -m "chore(diagrams): automated sync of Mermaid diagrams [skip ci]
+      - name: Checkout repository read-only
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
 
-- Synchronized diagrams from local filesystem
-- Maintains version history
-- Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-          git push origin master
-        else
-          echo "No diagram changes to commit"
-        fi
+      - name: Validate repository diagrams only
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Manual validation only."
+          echo "No local skills, external directories, secrets, commits, pushes or publications are permitted."
+          find diagrams docs/diagrams -type f \( -name '*.mmd' -o -name '*.mermaid' -o -name '*.md' \) -print 2>/dev/null || true
+
+      - name: Confirm non-publication policy
+        run: |
+          echo "Validation completed without modifying the repository."
+          git status --porcelain
+          test -z "$(git status --porcelain)"
