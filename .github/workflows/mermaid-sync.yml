@@ -1,31 +1,99 @@
-name: Mermaid Diagrams — Manual Validation Only
+name: Atlas MILK — Validação Automática Mistral de Diagramas
 
 on:
+  schedule:
+    - cron: '17 */6 * * *'
   workflow_dispatch:
+  push:
+    paths:
+      - 'diagrams/**'
+      - 'docs/diagrams/**'
+      - '.github/workflows/mermaid-sync.yml'
 
 permissions:
   contents: read
 
+concurrency:
+  group: atlas-milk-mistral-diagram-validation
+  cancel-in-progress: true
+
 jobs:
-  validate-diagrams:
+  validate:
     runs-on: ubuntu-latest
+    env:
+      MISTRAL_AGENT_ID: ag_019e93f1cc6571089ffe3042ff0fe7ce
+      MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
     steps:
-      - name: Checkout repository read-only
+      - name: Checkout read-only
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Validate repository diagrams only
+      - name: Deterministic integrity checks
         shell: bash
         run: |
           set -euo pipefail
-          echo "Manual validation only."
-          echo "No local skills, external directories, secrets, commits, pushes or publications are permitted."
-          find diagrams docs/diagrams -type f \( -name '*.mmd' -o -name '*.mermaid' -o -name '*.md' \) -print 2>/dev/null || true
+          mkdir -p audit
+          find diagrams docs/diagrams -type f \( -name '*.mmd' -o -name '*.mermaid' -o -name '*.md' \) -print 2>/dev/null | sort > audit/files.txt || true
+          while IFS= read -r file; do
+            sha256sum "$file"
+          done < audit/files.txt > audit/sha256.txt
+          {
+            echo 'ATLAS VIVO MILK — DIAGRAM VALIDATION MANIFEST'
+            echo "repository=${GITHUB_REPOSITORY}"
+            echo "commit=${GITHUB_SHA}"
+            echo "run_id=${GITHUB_RUN_ID}"
+            echo "file_count=$(wc -l < audit/files.txt)"
+            echo 'No Drive content, secrets, personal data or invisible-layer corpus included.'
+          } > audit/manifest.txt
+          cat audit/files.txt audit/sha256.txt >> audit/manifest.txt
+          ! grep -RIE '(MISTRAL_API_KEY|CODEBERG_TOKEN|ZENODO_TOKEN|ORCID_TOKEN|ghp_|sk-[A-Za-z0-9])' diagrams docs/diagrams 2>/dev/null
+          test -z "$(git status --porcelain --untracked-files=no)"
 
-      - name: Confirm non-publication policy
+      - name: Mistral agent review of minimised manifest
+        shell: bash
         run: |
-          echo "Validation completed without modifying the repository."
-          git status --porcelain
-          test -z "$(git status --porcelain)"
+          set -euo pipefail
+          if [ -z "${MISTRAL_API_KEY:-}" ]; then
+            printf '%s\n' 'MISTRAL_NOT_CONFIGURED — deterministic validation completed; no external call made.' > audit/mistral-status.txt
+            exit 0
+          fi
+          python3 - <<'PY'
+          import json, os, urllib.request
+          manifest = open('audit/manifest.txt', encoding='utf-8').read()
+          prompt = '''Actua como agente de integridade do Atlas Vivo MILK. Analisa apenas este manifesto minimizado de ficheiros públicos do repositório. Não assumes execução, conformidade, integração ou autoria sem prova. Classifica cada risco como FACTO, INFERÊNCIA, HIPÓTESE ou PROPOSTA. Não peças nem reveles segredos. Não publiques nem alteres nada. Responde em JSON com: status, riscos, inconsistencias, bloqueios_publicacao, recomendacao_humana.\n\n''' + manifest
+          payload = json.dumps({
+            'agent_id': os.environ['MISTRAL_AGENT_ID'],
+            'inputs': [{'role':'user','content':prompt}],
+            'store': False
+          }).encode()
+          req = urllib.request.Request(
+            'https://api.mistral.ai/v1/conversations',
+            data=payload,
+            headers={'Authorization':'Bearer '+os.environ['MISTRAL_API_KEY'],'Content-Type':'application/json'},
+            method='POST'
+          )
+          try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+              body = r.read().decode('utf-8')
+            open('audit/mistral-response.json','w',encoding='utf-8').write(body)
+            open('audit/mistral-status.txt','w',encoding='utf-8').write('MISTRAL_AGENT_CALLED — response stored as private workflow artifact; no publication or repository write.\n')
+          except Exception as exc:
+            open('audit/mistral-status.txt','w',encoding='utf-8').write('MISTRAL_CALL_FAILED — deterministic validation preserved; no publication occurred. '+type(exc).__name__+'\n')
+          PY
+
+      - name: Preserve private audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-milk-diagram-integrity-${{ github.run_id }}
+          path: audit/
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Confirm no repository modification or publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "$(git status --porcelain --untracked-files=no)"
+          echo 'Automatic analysis remains active. No commit, push, deploy or publication was performed.'
