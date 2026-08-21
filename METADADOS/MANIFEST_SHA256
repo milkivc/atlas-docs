@@ -1,0 +1,9 @@
+# MANIFEST SHA-256 - Associacao MILK
+# ORCID: 0009-004-9132-2925 | NIPC: 518706451
+# Data: 2026-07-09
+# Repositorio: associacao-milk-marco-zero
+
+## Checksums a calcular antes de publicacao
+Comando: find . -type f ! -path './METADADOS/*' ! -name '.*' -exec sha256sum {} ; | sort
+
+Associacao MILK | ORCID: 0009-004-9132-2925 | NIPC: 518706451

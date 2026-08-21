@@ -1,0 +1,15 @@
+# Git Ignore
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+.idea/
+.vscode/
+node_modules/
+__pycache__/
+*.py[cod]
+.env
+.venv/
+*.token
+*.secret
+*.key
