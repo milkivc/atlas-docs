@@ -1,29 +1,22 @@
 cff-version: 1.2.0
-message: "If you use this repository, please cite it using the metadata from this file."
-title: associacao-milk-marco-zero
-subtitle: "Documentacao Legal Fundacional da Associacao MILK"
+message: "Cite este repositório apenas na versão e no estado de publicação verificados."
+title: "Atlas Docs — Documentação Fundacional da Associação MILK"
+type: software
 authors:
-- given-names: Associacao
-  family-names: MILK
-  orcid: 0009-004-9132-2925
-title-identifier:
-  type: url
-  value: "https://codeberg.org/milkivc/associacao-milk-marco-zero"
-year: 2026
-month: 7
-day: 9
-version: 1.0.0
-description: Repositorio contendo a documentacao legal fundacional da Associacao MILK.
+  - given-names: Nuno Filipe Fernandes Vieira Cabral e Araújo
+    orcid: "https://orcid.org/0009-0009-1781-4020"
+  - given-names: Eduardo Maurício Vieira Cabral e Araújo
+    orcid: "https://orcid.org/0009-0007-6892-6570"
+version: "1.0.0"
+date-released: "2026-07-09"
+license: "EUPL-1.2"
+repository-code: "https://github.com/milkivc/atlas-docs"
+abstract: >-
+  Documentação fundacional, jurídica, metodológica e de governação da Associação
+  MILK — Movimento de Intervenções e Linguagens Kulturais e Arte.
 keywords:
-- Associacao MILK
-- Documentacao Legal
-- Estatutos
-- NIPC 518706451
-license: EUPL-1.2
-license-url: "https://joinup.ec.europa.eu/collection/eupl/eupl-1.2"
-identifiers:
-- type: orcid
-  value: "0009-004-9132-2925"
-- type: nipc
-  value: "518706451"
-repository: "https://codeberg.org/milkivc/associacao-milk-marco-zero"
+  - Associação MILK
+  - Atlas Vivo MILK
+  - governação
+  - património cultural
+  - interoperabilidade
