@@ -29,10 +29,10 @@ jobs:
           set -euo pipefail
           if [ -z "${CODEBERG_TOKEN}" ]; then
             echo "enabled=false" >> "${GITHUB_OUTPUT}"
-            echo "::notice::CODEBERG_TOKEN is not configured in this repository; sync skipped without destructive fallback."
-          else
-            echo "enabled=true" >> "${GITHUB_OUTPUT}"
+            echo "::error::CODEBERG_TOKEN is not configured in this repository."
+            exit 2
           fi
+          echo "enabled=true" >> "${GITHUB_OUTPUT}"
 
       - name: Checkout repository
         if: steps.credential.outputs.enabled == 'true'
@@ -45,7 +45,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          code="$(curl --silent --show-error --output /tmp/codeberg-repo.json --write-out '%{http_code}'             -H "Authorization: token ${CODEBERG_TOKEN}"             "https://codeberg.org/api/v1/repos/${CODEBERG_USER}/${CODEBERG_REPO}")"
+          code="$(curl --silent --show-error --output /tmp/codeberg-repo.json --write-out '%{http_code}' -H "Authorization: token ${CODEBERG_TOKEN}" "https://codeberg.org/api/v1/repos/${CODEBERG_USER}/${CODEBERG_REPO}")"
           if [ "${code}" = "200" ]; then
             echo "Codeberg repository already exists."
             exit 0
@@ -55,16 +55,8 @@ jobs:
             cat /tmp/codeberg-repo.json || true
             exit 2
           fi
-          payload="$(python - <<'PY'
-import json
-print(json.dumps({
-    "name": "atlas-docs",
-    "description": "Mirror de milkivc/atlas-docs - Associação MILK",
-    "private": False
-}))
-PY
-)"
-          curl --fail --silent --show-error             -X POST             -H "Authorization: token ${CODEBERG_TOKEN}"             -H "Content-Type: application/json"             --data "${payload}"             "https://codeberg.org/api/v1/user/repos" >/tmp/codeberg-create.json
+          payload="$(python -c 'import json; print(json.dumps({"name":"atlas-docs","description":"Mirror de milkivc/atlas-docs - Associação MILK","private":False}))')"
+          curl --fail --silent --show-error -X POST -H "Authorization: token ${CODEBERG_TOKEN}" -H "Content-Type: application/json" --data "${payload}" "https://codeberg.org/api/v1/user/repos" >/tmp/codeberg-create.json
 
       - name: Sync current branch to Codeberg without force
         if: steps.credential.outputs.enabled == 'true'
@@ -94,5 +86,3 @@ PY
             exit 3
           fi
           echo "Codeberg sync verified: ${remote_sha}"
-
-# Retry trigger after CODEBERG_TOKEN refresh on 2026-09-02.
