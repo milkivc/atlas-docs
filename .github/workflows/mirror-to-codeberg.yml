@@ -94,3 +94,5 @@ PY
             exit 3
           fi
           echo "Codeberg sync verified: ${remote_sha}"
+
+# Retry trigger after CODEBERG_TOKEN refresh on 2026-09-02.
