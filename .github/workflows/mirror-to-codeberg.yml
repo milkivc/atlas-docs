@@ -5,84 +5,34 @@ on:
   push:
     branches:
       - master
-      - main
-  schedule:
-    - cron: '0 * * * *'
 
 permissions:
   contents: read
 
 jobs:
-  mirror-to-codeberg:
-    name: Sync repository to Codeberg safely
+  mirror:
     runs-on: ubuntu-latest
-    env:
-      CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
-      CODEBERG_USER: milkivc
-      CODEBERG_REPO: atlas-docs
-
     steps:
-      - name: Check Codeberg credential availability
-        id: credential
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ -z "${CODEBERG_TOKEN}" ]; then
-            echo "enabled=false" >> "${GITHUB_OUTPUT}"
-            echo "::error::CODEBERG_TOKEN is not configured in this repository."
-            exit 2
-          fi
-          echo "enabled=true" >> "${GITHUB_OUTPUT}"
-
-      - name: Checkout repository
-        if: steps.credential.outputs.enabled == 'true'
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Ensure Codeberg repository exists
-        if: steps.credential.outputs.enabled == 'true'
-        shell: bash
+      - name: Push master to Codeberg
+        env:
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
         run: |
           set -euo pipefail
-          code="$(curl --silent --show-error --output /tmp/codeberg-repo.json --write-out '%{http_code}' -H "Authorization: token ${CODEBERG_TOKEN}" "https://codeberg.org/api/v1/repos/${CODEBERG_USER}/${CODEBERG_REPO}")"
-          if [ "${code}" = "200" ]; then
-            echo "Codeberg repository already exists."
-            exit 0
-          fi
-          if [ "${code}" != "404" ]; then
-            echo "::error::Codeberg repository lookup failed with HTTP ${code}"
-            cat /tmp/codeberg-repo.json || true
-            exit 2
-          fi
-          payload="$(python -c 'import json; print(json.dumps({"name":"atlas-docs","description":"Mirror de milkivc/atlas-docs - Associação MILK","private":False}))')"
-          curl --fail --silent --show-error -X POST -H "Authorization: token ${CODEBERG_TOKEN}" -H "Content-Type: application/json" --data "${payload}" "https://codeberg.org/api/v1/user/repos" >/tmp/codeberg-create.json
+          test -n "${CODEBERG_TOKEN}"
+          git remote add codeberg "https://milkivc:${CODEBERG_TOKEN}@codeberg.org/milkivc/atlas-docs.git"
+          git push codeberg HEAD:master
 
-      - name: Sync current branch to Codeberg without force
-        if: steps.credential.outputs.enabled == 'true'
-        shell: bash
+      - name: Verify
+        env:
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
         run: |
           set -euo pipefail
-          branch="${GITHUB_REF_NAME:-master}"
-          case "${branch}" in
-            master|main) ;;
-            *) echo "::error::Unexpected branch for Codeberg sync: ${branch}"; exit 2 ;;
-          esac
-          remote="https://${CODEBERG_USER}:${CODEBERG_TOKEN}@codeberg.org/${CODEBERG_USER}/${CODEBERG_REPO}.git"
-          git remote add codeberg "${remote}"
-          git push codeberg "HEAD:refs/heads/${branch}"
-
-      - name: Verify synchronized commit
-        if: steps.credential.outputs.enabled == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          branch="${GITHUB_REF_NAME:-master}"
-          local_sha="$(git rev-parse HEAD)"
-          remote_sha="$(git ls-remote codeberg "refs/heads/${branch}" | awk '{print $1}')"
-          test -n "${remote_sha}"
-          if [ "${local_sha}" != "${remote_sha}" ]; then
-            echo "::error::Codeberg verification mismatch local=${local_sha} remote=${remote_sha}"
-            exit 3
-          fi
-          echo "Codeberg sync verified: ${remote_sha}"
+          LOCAL_SHA="$(git rev-parse HEAD)"
+          REMOTE_SHA="$(git ls-remote "https://milkivc:${CODEBERG_TOKEN}@codeberg.org/milkivc/atlas-docs.git" refs/heads/master | cut -f1)"
+          test "${LOCAL_SHA}" = "${REMOTE_SHA}"
+          echo "Codeberg synchronized and verified: ${REMOTE_SHA}"
