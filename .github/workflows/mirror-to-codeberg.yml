@@ -20,19 +20,19 @@ jobs:
 
       - name: Push master to Codeberg
         env:
-          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+          CODEBERG_KEY: ${{ secrets.CODEBERG_KEY }}
         run: |
           set -euo pipefail
-          test -n "${CODEBERG_TOKEN}"
-          git remote add codeberg "https://milkivc:${CODEBERG_TOKEN}@codeberg.org/milkivc/atlas-docs.git"
+          test -n "${CODEBERG_KEY}"
+          git remote add codeberg "https://milkivc:${CODEBERG_KEY}@codeberg.org/milkivc/atlas-docs.git"
           git push codeberg HEAD:master
 
       - name: Verify
         env:
-          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+          CODEBERG_KEY: ${{ secrets.CODEBERG_KEY }}
         run: |
           set -euo pipefail
           LOCAL_SHA="$(git rev-parse HEAD)"
-          REMOTE_SHA="$(git ls-remote "https://milkivc:${CODEBERG_TOKEN}@codeberg.org/milkivc/atlas-docs.git" refs/heads/master | cut -f1)"
+          REMOTE_SHA="$(git ls-remote "https://milkivc:${CODEBERG_KEY}@codeberg.org/milkivc/atlas-docs.git" refs/heads/master | cut -f1)"
           test "${LOCAL_SHA}" = "${REMOTE_SHA}"
           echo "Codeberg synchronized and verified: ${REMOTE_SHA}"
