@@ -22,6 +22,14 @@ LICENSE       EUPL-1.2
 CITATION.cff  metadados de citação
 ```
 
+## Identificador institucional canónico
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22412484.svg)](https://doi.org/10.5281/zenodo.22412484)
+
+- DOI conceptual, recomendado para citar o perfil institucional em todas as versões: [10.5281/zenodo.22412484](https://doi.org/10.5281/zenodo.22412484)
+- DOI da versão 1.0.0: [10.5281/zenodo.22412485](https://doi.org/10.5281/zenodo.22412485)
+- Regra para documentos futuros: incluir o DOI conceptual no rodapé institucional e o DOI da versão quando a referência exigir imutabilidade.
+
 ## Estado
 
 Documentação em consolidação. Referências a RGPD, AI Act, EIF, WCAG, IIIF, FIWARE ou ISO/IEC 42001 devem ser entendidas como enquadramentos e metas verificáveis, nunca como certificação automática.
